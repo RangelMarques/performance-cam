@@ -4,18 +4,26 @@
   "private": true,
   "description": "Testes de carga das landing pages (Artillery + TypeScript)",
   "scripts": {
-    "smoke": "node scripts/rodar.mts smoke",
-    "carga:100": "node scripts/rodar.mts c100",
-    "carga:1k": "node scripts/rodar.mts c1k",
-    "carga:5k": "node scripts/rodar.mts c5k",
-    "carga:15k": "node scripts/rodar.mts c15k",
-    "carga": "node scripts/rodar.mts degraus",
+    "acesso:smoke": "node scripts/rodar.mts acesso smoke",
+    "acesso:100": "node scripts/rodar.mts acesso c100",
+    "acesso:1k": "node scripts/rodar.mts acesso c1k",
+    "acesso:5k": "node scripts/rodar.mts acesso c5k",
+    "acesso:15k": "node scripts/rodar.mts acesso c15k",
+    "acesso:completo": "node scripts/rodar.mts acesso degraus",
+    "inscricao:gravar": "cypress run --spec cypress/gravadores/inscricao.cy.ts",
+    "inscricao:smoke": "node scripts/rodar.mts inscricao smoke",
+    "inscricao:100": "node scripts/rodar.mts inscricao c100",
+    "inscricao:500": "node scripts/rodar.mts inscricao c500",
+    "inscricao:1k": "node scripts/rodar.mts inscricao c1k",
+    "inscricao:pico": "node scripts/rodar.mts inscricao pico",
+    "inscricao:completo": "node scripts/rodar.mts inscricao degraus",
     "relatorio": "node scripts/relatorio.mts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p cypress"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "artillery": "^2.0.34",
+    "cypress": "^16.3.0",
     "typescript": "^7.0.2",
     "yaml": "^2.9.1"
   }

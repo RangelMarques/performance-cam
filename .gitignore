@@ -6,6 +6,12 @@ node_modules/
 # Processor compilado pelo Artillery
 src/dist/
 
+# Gravações do Cypress e cenários gerados a partir delas (contêm as URLs do ambiente)
+gravacoes/
+tests/gerado/
+cypress/screenshots/
+cypress/videos/
+
 # Relatórios e dados gerados a cada execução
 reports/*.html
 reports/dados/

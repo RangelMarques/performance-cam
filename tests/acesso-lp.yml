@@ -1,14 +1,19 @@
-# Teste de acesso à landing page (só carrega a URL, sem interagir com elementos).
+# Teste de acesso à landing page, sem interagir com elementos.
+#
+# Cada usuário virtual faz o que o navegador faz ao abrir a página:
+#   1. baixa a página (LP_URL no .env)
+#   2. chama a API que carrega os ingressos (LP_API_INGRESSOS no .env; se vazia, essa etapa é pulada)
 #
 # Como a carga funciona: cada usuário virtual acessa a página e fica 10s "nela".
 # Então  usuários simultâneos ≈ chegadas por segundo × 10.
 #   arrivalRate 1500/s  →  ~15.000 usuários simultâneos
 #
-# Rodar:  npm run smoke      (validação rápida, ~10 acessos)
-#         npm run carga:100  (um degrau só; também carga:1k, carga:5k, carga:15k)
-#         npm run carga      (todos os degraus em sequência até 15 mil)
+# Rodar:  npm run acesso:smoke     (validação rápida, ~10 acessos)
+#         npm run acesso:100       (um degrau só; também acesso:1k, acesso:5k, acesso:15k)
+#         npm run acesso:completo  (todos os degraus em sequência até 15 mil)
 #
-# Toda execução gera um relatório visual em reports/ e atualiza reports/index.html.
+# Este cenário não tem critério de aprovação: o objetivo é achar onde o ambiente cede.
+# Toda execução gera um relatório visual com o diagnóstico de gargalo em reports/.
 
 config:
   # O endereço real vem de LP_URL no arquivo .env (veja .env.example). O scripts/rodar.mts
@@ -18,15 +23,9 @@ config:
   http:
     timeout: 30
   plugins:
-    ensure: {}
-  # Critérios de aprovação: o comando sai com erro se algum falhar.
-  ensure:
-    thresholds:
-      - "http.response_time.p95": 1000
-      - "http.response_time.p99": 2500
-    conditions:
-      - expression: "vusers.failed == 0"
-        strict: false
+    # Tempo e resultado de cada etapa separados no relatório.
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
 
   environments:
     smoke:
@@ -35,7 +34,7 @@ config:
           duration: 10
           arrivalRate: 1
 
-    # Um degrau por vez (npm run carga:100, carga:1k, carga:5k, carga:15k)
+    # Um degrau por vez (npm run acesso:100, acesso:1k, acesso:5k, acesso:15k)
     c100:
       phases:
         - name: "sobe até 100 simultâneos"
@@ -76,7 +75,7 @@ config:
           duration: 120
           arrivalRate: 1500
 
-    # Todos os degraus em sequência (npm run carga)
+    # Todos os degraus em sequência (npm run acesso:completo)
     degraus:
       phases:
         - name: "sobe até 100 simultâneos"
@@ -112,6 +111,12 @@ scenarios:
   - name: "Acessa a landing page"
     flow:
       - get:
+          name: "1. GET landing page"
           url: "{{ pagina }}"
+          afterResponse: "contarRespostas"
+      - get:
+          name: "2. GET API de ingressos"
+          url: "{{ apiIngressos }}"
+          ifTrue: "apiIngressos"
           afterResponse: "contarRespostas"
       - think: 10
