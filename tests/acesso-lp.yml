@@ -1,0 +1,117 @@
+# Teste de acesso à landing page (só carrega a URL, sem interagir com elementos).
+#
+# Como a carga funciona: cada usuário virtual acessa a página e fica 10s "nela".
+# Então  usuários simultâneos ≈ chegadas por segundo × 10.
+#   arrivalRate 1500/s  →  ~15.000 usuários simultâneos
+#
+# Rodar:  npm run smoke      (validação rápida, ~10 acessos)
+#         npm run carga:100  (um degrau só; também carga:1k, carga:5k, carga:15k)
+#         npm run carga      (todos os degraus em sequência até 15 mil)
+#
+# Toda execução gera um relatório visual em reports/ e atualiza reports/index.html.
+
+config:
+  # O endereço real vem de LP_URL no arquivo .env (veja .env.example). O scripts/rodar.mts
+  # separa a URL e passa o domínio como --target e o caminho como a variável "pagina".
+  target: "http://localhost"
+  processor: "../src/processor.ts"
+  http:
+    timeout: 30
+  plugins:
+    ensure: {}
+  # Critérios de aprovação: o comando sai com erro se algum falhar.
+  ensure:
+    thresholds:
+      - "http.response_time.p95": 1000
+      - "http.response_time.p99": 2500
+    conditions:
+      - expression: "vusers.failed == 0"
+        strict: false
+
+  environments:
+    smoke:
+      phases:
+        - name: "smoke"
+          duration: 10
+          arrivalRate: 1
+
+    # Um degrau por vez (npm run carga:100, carga:1k, carga:5k, carga:15k)
+    c100:
+      phases:
+        - name: "sobe até 100 simultâneos"
+          duration: 30
+          arrivalRate: 1
+          rampTo: 10
+        - name: "segura 100"
+          duration: 60
+          arrivalRate: 10
+
+    c1k:
+      phases:
+        - name: "sobe até 1 mil"
+          duration: 30
+          arrivalRate: 1
+          rampTo: 100
+        - name: "segura 1 mil"
+          duration: 60
+          arrivalRate: 100
+
+    c5k:
+      phases:
+        - name: "sobe até 5 mil"
+          duration: 60
+          arrivalRate: 1
+          rampTo: 500
+        - name: "segura 5 mil"
+          duration: 60
+          arrivalRate: 500
+
+    c15k:
+      phases:
+        - name: "sobe até 15 mil"
+          duration: 120
+          arrivalRate: 1
+          rampTo: 1500
+        - name: "segura 15 mil"
+          duration: 120
+          arrivalRate: 1500
+
+    # Todos os degraus em sequência (npm run carga)
+    degraus:
+      phases:
+        - name: "sobe até 100 simultâneos"
+          duration: 30
+          arrivalRate: 1
+          rampTo: 10
+        - name: "segura 100"
+          duration: 60
+          arrivalRate: 10
+        - name: "sobe até 1 mil"
+          duration: 30
+          arrivalRate: 10
+          rampTo: 100
+        - name: "segura 1 mil"
+          duration: 60
+          arrivalRate: 100
+        - name: "sobe até 5 mil"
+          duration: 30
+          arrivalRate: 100
+          rampTo: 500
+        - name: "segura 5 mil"
+          duration: 60
+          arrivalRate: 500
+        - name: "sobe até 15 mil"
+          duration: 60
+          arrivalRate: 500
+          rampTo: 1500
+        - name: "segura 15 mil"
+          duration: 120
+          arrivalRate: 1500
+
+scenarios:
+  - name: "Acessa a landing page"
+    flow:
+      - get:
+          url: "{{ pagina }}"
+          afterResponse: "contarRespostas"
+      - think: 10

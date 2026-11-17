@@ -1,0 +1,11 @@
+node_modules/
+
+# URL do ambiente testado (veja .env.example)
+.env
+
+# Processor compilado pelo Artillery
+src/dist/
+
+# Relatórios e dados gerados a cada execução
+reports/*.html
+reports/dados/
