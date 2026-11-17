@@ -152,8 +152,13 @@ const principal = esta?.achados[0];
 console.log(`Concluído.${principal ? ` Principal achado: ${principal.titulo}.` : ""}`);
 console.log(`Relatório: ${html}`);
 
-if (abrir && process.platform === "win32") {
-  spawn("cmd", ["/c", "start", "", html], { detached: true, stdio: "ignore" }).unref();
+// Abre o relatório no navegador padrão (Windows, Mac e Linux).
+if (abrir) {
+  const [comando, args] =
+    process.platform === "win32" ? ["cmd", ["/c", "start", "", html]]
+    : process.platform === "darwin" ? ["open", [html]]
+    : ["xdg-open", [html]];
+  spawn(comando, args, { detached: true, stdio: "ignore" }).on("error", () => {}).unref();
 }
 
 // Cenários sem critério (como o de acesso) sempre terminam com sucesso.

@@ -50,7 +50,21 @@ Cada execução gera um relatório visual em HTML e entra num histórico de exec
    npm run acesso:smoke
    ```
 
-Ao terminar, o relatório abre sozinho no navegador (no Windows) e o caminho do arquivo aparece no terminal.
+Ao terminar, o relatório abre sozinho no navegador (Windows, Mac ou Linux) e o caminho do arquivo aparece no terminal.
+
+### No Mac
+
+- O Cypress não precisa de nenhuma biblioteca extra; funciona em chip Apple e Intel.
+- Se o npm pular o download do Cypress, rode `npx cypress install`.
+- **Antes de rodar carga**, aumente o limite de arquivos abertos no terminal que vai rodar o teste.
+  O padrão do macOS costuma ser 256, e cada conexão conta como um arquivo:
+
+  ```bash
+  ulimit -n 65536
+  ```
+
+- Para o Mac não dormir no meio do teste, rode com `caffeinate -i` na frente, por exemplo
+  `caffeinate -i npm run inscricao:pico`.
 
 ## Cenário 1: acesso à landing page
 

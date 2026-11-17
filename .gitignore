@@ -3,6 +3,9 @@ node_modules/
 # URL do ambiente testado (veja .env.example)
 .env
 
+# Arquivos locais que podem ter endereços do ambiente (ex.: prompt de preparo da máquina)
+*.local.*
+
 # Processor compilado pelo Artillery
 src/dist/
 
